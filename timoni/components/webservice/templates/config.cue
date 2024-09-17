@@ -66,7 +66,7 @@ import (
 				if buildTool == "nixpack" {
 						nixpackPath: string
 				}
-				ociRepository: "registry-service.conure-system.svc.cluster.local:5000/services/" + metadata.name
+				ociRepository: "localhost:30050/services/" + metadata.name
 				tag: string
     }
     if sourceType == "oci" {

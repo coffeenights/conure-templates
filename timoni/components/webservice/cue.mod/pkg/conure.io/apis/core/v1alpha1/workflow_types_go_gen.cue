@@ -11,6 +11,7 @@ import (
 
 #Action: {
 	name:    string                       @go(Name)
+	type:    string                       @go(Type)
 	values?: null | runtime.#RawExtension @go(Values,*runtime.RawExtension)
 }
 
@@ -37,3 +38,4 @@ import (
 	metadata?: metav1.#ListMeta @go(ListMeta)
 	items: [...#Workflow] @go(Items,[]Workflow)
 }
+

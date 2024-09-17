@@ -15,7 +15,8 @@ import (
 			if #config.source.sourceType == "git" {
 				if #config.source.buildTool == "dockerfile" {
 					{
-						name: "build-image",
+						name: "build-push-image",
+						type: "build-image",
 						values: {
 							branch: #config.source.gitBranch
 							dockerFile: #config.source.dockerfilePath

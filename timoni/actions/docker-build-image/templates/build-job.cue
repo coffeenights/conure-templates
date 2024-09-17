@@ -42,7 +42,7 @@ import (
 					imagePullPolicy: "IfNotPresent"
 					args: [
 						"--insecure",
-            "--skip-tls-verify",
+            			"--skip-tls-verify",
 						"--dockerfile=/workspace/\(#config.dockerFile)",
 						"--context=/workspace",
 						"--destination=\(#config.ociRepository):\(#config.ociTag)",
