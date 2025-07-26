@@ -27,6 +27,9 @@ import (
 	// By default, the minimum Kubernetes version is set to 1.20.
 	clusterVersion: timoniv1.#SemVer & {#Version: kubeVersion, #Minimum: "1.20.0"}
 
+	// instanceName!: timoniv1.#InstanceName
+	// namespace!:    timoniv1.#Namespace
+
 	// The moduleVersion is set from the user-supplied module version.
 	// This field is used for the `app.kubernetes.io/version` label.
 	moduleVersion!: string
@@ -68,14 +71,14 @@ import (
 				}
 				ociRepository: "registry-service.conure-system.svc:5000/services/" + metadata.name
 				tag: string
-    }
+    	}
     if sourceType == "oci" {
         ociRepository: string
         tag: string
     }
 		command: [...string]
 		workingDir: string
-		imagePullSecretsName: string
+		imagePullSecretsName?: string
 	}
 	network: {
 		exposed: bool
@@ -83,6 +86,7 @@ import (
 		ports: [...#Port]
 	}
 	storage?: [...#Storage]
+	variables?:  {[string]: string}
 }
 
 // Instance takes the config values and outputs the Kubernetes objects.
@@ -90,11 +94,17 @@ import (
 	config: #Config
 
 	objects: {
-			workflow: #ComponentWorkflow & {#config: config}
+			// workflow: #ComponentWorkflow & {#config: config}
+			if config.variables != _|_ {
+				configmap: #ConfigMap & {#config: config}
+			}
 			deploy: #Deployment & {#config: config}
 			service: #Service & {#config: config}
-			for index, value in config.storage {
-				"\(config.metadata.name)-pvc-\(index)": #PVC & {#config: config, #index: index, #value: value}
+			if config.storage != _|_ {
+				for index, value in config.storage {
+					"\(config.metadata.name)-pvc-\(index)": #PVC & {#config: config, #index: index, #value: value}
+				}
 			}
+			
 	}
 }

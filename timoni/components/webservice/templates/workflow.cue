@@ -1,7 +1,7 @@
 package templates
 
 import (
-	conurev1 "conure.io/apis/core/v1alpha1"
+	conurev1 "github.com/coffeenights/conure/apis/core/v1alpha1"
 )
 
 

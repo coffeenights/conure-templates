@@ -44,5 +44,9 @@ package main
       "name": "cache",
       "mountPath": "/mnt/storage2"
     }
-  ]
+  ],
+  "variables": {
+      "ENV": "dev",
+      "DEBUG": "true"
+  }
 }

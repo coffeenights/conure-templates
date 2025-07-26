@@ -6,6 +6,8 @@ package v1alpha1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+#WorkflowActionNamelabel: "conure.io/workflow-action-name"
+
 // ActionDefinitionSpec defines the desired state of ActionDefinition
 #ActionDefinitionSpec: {
 	ociRepository: string @go(OCIRepository)
@@ -14,8 +16,7 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 }
 
 // ActionDefinitionStatus defines the observed state of ActionDefinition
-#ActionDefinitionStatus: {
-}
+#ActionDefinitionStatus: {}
 
 // ActionDefinition is the Schema for the actionDefinition API
 // +kubebuilder:subresource:status

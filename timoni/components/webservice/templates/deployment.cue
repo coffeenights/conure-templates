@@ -10,7 +10,7 @@ import (
 	#config:    #Config
 	apiVersion: "apps/v1"
 	kind:       "Deployment"
-	metadata:   #config.metadata
+	metadata:   #config.metadata 
 	spec: appsv1.#DeploymentSpec & {
 		replicas: strconv.Atoi(#config.resources.replicas)
 		selector: matchLabels: #config.selector.labels
@@ -52,6 +52,13 @@ import (
 								name: item.name
 							}]
 						}
+						envFrom: [
+							{
+								configMapRef: {
+									name: #config.metadata.name + "-config"
+								}
+							}
+						]
 					}
 				]
 				if #config.storage != _|_ {

@@ -27,6 +27,8 @@ timoni: {
 		config: values
 		// These values are injected at runtime by Timoni.
 		config: {
+			// instanceName: string @tag(name)
+			// namespace:    string @tag(namespace)
 			metadata: {
 				name:      string @tag(name)
 				namespace: string @tag(namespace)
