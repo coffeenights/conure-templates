@@ -5,3 +5,5 @@ package service
     // Number of pod replicas to run
     replicas: int & >0
 }
+
+values: #Values
