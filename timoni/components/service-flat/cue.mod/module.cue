@@ -1,4 +1,4 @@
-module: "conure.io/coffeenights/conure-templates/service-flat"
+module: "ghcr.io/coffeenights/conure-templates/service-flat"
 language: {
 	version: "v0.15.1"
 }
