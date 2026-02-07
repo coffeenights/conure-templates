@@ -1,4 +1,4 @@
-@if(debug)
+@if(debug_agent)
 
 package main
 
