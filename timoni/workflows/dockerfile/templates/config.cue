@@ -55,7 +55,7 @@ import (
 		}
 		command: [...string]
 		workingDir: string
-		imagePullSecretsName: string
+		imagePullSecrets: string
 	}
 }
 

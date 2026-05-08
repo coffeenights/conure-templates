@@ -1,6 +1,8 @@
 package main
 
-import "conure.io/service/templates"
+import "ghcr.io/coffeenights/conure-templates/service/templates"
+
+values: templates.#Config
 
 instance: templates.#Instance & {
     config: values

@@ -69,7 +69,7 @@ import (
 					{
 						name: "kaniko-secret"
 						secret: {
-							secretName: #config.imagePullSecretsName
+							secretName: #config.imagePullSecrets
 							items: [
 								{
 									key:  ".dockerconfigjson"
@@ -79,7 +79,7 @@ import (
 						}
 					}
 				]
-				imagePullSecrets: [{name: #config.imagePullSecretsName}]
+				imagePullSecrets: [{name: #config.imagePullSecrets}]
 				restartPolicy: "Never"
 				if #config.podSecurityContext != _|_ {
 					securityContext: #config.podSecurityContext

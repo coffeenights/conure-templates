@@ -18,6 +18,19 @@ import (
 	mountPath: string
 }
 
+#IngressConfig: {
+	host:        string
+	port:        string
+	className?:  string
+	path:        *"/" | string
+	pathType:    *"Prefix" | "Exact" | "ImplementationSpecific"
+	tls?: {
+		secretName: string
+		hosts?: [...string]
+	}
+	annotations?: {[string]: string}
+}
+
 // Config defines the schema and defaults for the Instance values.
 #Config: {
 	// The kubeVersion is a required field, set at apply-time
@@ -60,33 +73,37 @@ import (
 	source: {
 		sourceType: "git" | "oci"
 		if sourceType == "git" {
-        gitRepository: string
-        gitBranch: string
-        buildTool: "nixpack" | *"dockerfile"
-				if buildTool == "dockerfile" {
-						dockerfilePath: string
-				}
-				if buildTool == "nixpack" {
-						nixpackPath: string
-				}
-				ociRepository: "registry-service.conure-system.svc:5000/services/" + metadata.name
-				tag: string
+			gitRepository: string
+			gitBranch: string
+			buildTool: "nixpack" | *"dockerfile"
+			if buildTool == "dockerfile" {
+					dockerfilePath: string
+			}
+			if buildTool == "nixpack" {
+					nixpackPath: string
+			}
+			ociRepository: "registry-service.conure-system.svc:5000/services/" + metadata.name
+			tag: string
     	}
-    if sourceType == "oci" {
-        ociRepository: string
-        tag: string
-    }
+		if sourceType == "oci" {
+			ociRepository: string
+			tag: string
+		}
 		command: [...string]
 		workingDir: string
-		imagePullSecretsName?: string
+		imagePullSecrets?: string
+		imagePullPolicy: "Always" | *"IfNotPresent"
 	}
 	network: {
-		exposed: bool
-		type: *"public" | "private"
+		exposed:     bool
+		// Deprecated: kept for transition. Use `serviceType` to control Service type
+		// and `exposed` (with `ingress`) to provision an Ingress.
+		type?: "public" | "private"
+		serviceType: *"ClusterIP" | "LoadBalancer" | "NodePort"
 		ports: [...#Port]
+		ingress?: #IngressConfig
 	}
 	storage?: [...#Storage]
-	variables?:  {[string]: string}
 }
 
 // Instance takes the config values and outputs the Kubernetes objects.
@@ -94,17 +111,16 @@ import (
 	config: #Config
 
 	objects: {
-			// workflow: #ComponentWorkflow & {#config: config}
-			if config.variables != _|_ {
-				configmap: #ConfigMap & {#config: config}
-			}
 			deploy: #Deployment & {#config: config}
 			service: #Service & {#config: config}
+			if config.network.exposed && config.network.ingress != _|_ {
+				ingress: #Ingress & {#config: config}
+			}
 			if config.storage != _|_ {
 				for index, value in config.storage {
 					"\(config.metadata.name)-pvc-\(index)": #PVC & {#config: config, #index: index, #value: value}
 				}
 			}
-			
+
 	}
 }

@@ -35,7 +35,7 @@ import (
 							command: #config.source.command
 						}
 						workingDir: #config.source.workingDir
-						imagePullPolicy: "IfNotPresent"
+						imagePullPolicy: #config.source.imagePullPolicy
 						resources: {
 							requests: {
 								cpu: #config.resources.cpu
@@ -55,9 +55,14 @@ import (
 						envFrom: [
 							{
 								configMapRef: {
-									name: #config.metadata.name + "-config"
+									name: #config.metadata.name + "-variables"
 								}
-							}
+							},
+							{
+								secretRef: {
+									name: #config.metadata.name + "-secrets"
+								}
+							},
 						]
 					}
 				]
@@ -69,9 +74,9 @@ import (
 						}
 					}]
 				}
-//				if #config.pod.imagePullSecrets != _|_ {
-//					imagePullSecrets: #config.pod.imagePullSecrets
-//				}
+				if #config.source.imagePullSecrets != _|_ {
+					imagePullSecrets: #config.source.imagePullSecrets
+				}
 			}
 		}
 	}

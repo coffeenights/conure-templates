@@ -8,7 +8,7 @@ values: {
 	branch: "main"
 	dockerFile: "cmd/api-server/Dockerfile"
 	gitRepository: "https://github.com/coffeenights/conure.git"
-	imagePullSecretsName: "regcred"
+	imagePullSecrets: "regcred"
 	ociRepository: "registry-service.conure-system.svc:5000/services/backend-service"
 	ociTag: "latest"
 	nameSuffix: "test"

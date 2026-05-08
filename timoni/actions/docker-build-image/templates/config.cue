@@ -38,7 +38,7 @@ import (
 
 	// Docker Build options
 	// Name of the k8s secret where the docker repository credentials are stored.
-	imagePullSecretsName: string
+	imagePullSecrets: string
 
 	// Name of the git repository to pull the code from.
 	gitRepository: string

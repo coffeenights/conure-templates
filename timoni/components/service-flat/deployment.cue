@@ -1,4 +1,4 @@
-package service
+package main
 
 import appsv1 "cue.dev/x/k8s.io/api/apps/v1"
 

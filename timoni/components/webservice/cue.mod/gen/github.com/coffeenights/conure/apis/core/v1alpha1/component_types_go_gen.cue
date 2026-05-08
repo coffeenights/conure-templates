@@ -146,7 +146,7 @@ import (
 	tag?:            string @go(Tag)
 	command: [...string] @go(Command,[]string)
 	workingDir:           string @go(WorkingDir)
-	imagePullSecretsName: string @go(ImagePullSecretsName)
+	imagePullSecrets: string @go(ImagePullSecrets)
 }
 
 #Storage: {

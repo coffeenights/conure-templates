@@ -1,4 +1,4 @@
-package service
+package main
 
 // Configuration values for the service component
 #Values: {

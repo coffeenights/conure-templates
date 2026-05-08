@@ -9,7 +9,7 @@ package main
 values: {
 //	gitRepository: "https://github.com/coffeenights/conure.git"
 //	branch: "main"
-//	imagePullSecretsName: "regcred"
+//	imagePullSecrets: "regcred"
 //	message: "Building Conure!"
 	storageSize: "10Gi"
 //	namespace: "conure-system"

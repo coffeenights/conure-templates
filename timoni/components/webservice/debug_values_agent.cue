@@ -13,7 +13,7 @@ package main
     "type": "public",
     "ports": [
       {
-        "hostPort": "10090",
+        "hostPort": "8030",
         "targetPort": "8000",
         "protocol": "TCP"
       }
@@ -21,13 +21,9 @@ package main
   },
   "source": {
     "sourceType": "oci",
-    "ociRepository": "dev.conure.local:30050/services/simple-agent",
+    "ociRepository": "ghcr.io/mredvard/fastapi_demo",
     "tag": "latest",
-    "command": ["/opt/env/bin/python", "runner/main.py"],
+    "command": ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
     "workingDir": "/app"
-  },
-  "variables": {
-    "LOCAL_LLM_URL": "https://api.openai.com/v1/",
-    "OPENAI_API_KEY": "<key>"
   }
 }

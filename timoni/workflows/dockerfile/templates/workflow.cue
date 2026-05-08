@@ -21,7 +21,7 @@ import (
 							branch: #config.source.gitBranch
 							dockerFile: #config.source.dockerfilePath
 							gitRepository: #config.source.gitRepository
-							imagePullSecretsName: #config.source.imagePullSecretsName
+							imagePullSecrets: #config.source.imagePullSecrets
 							ociRepository: #config.source.ociRepository
 							ociTag: "latest"
 						}
