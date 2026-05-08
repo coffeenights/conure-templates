@@ -29,12 +29,12 @@ import (
 		}
 		rules: [{
 			host: #config.network.ingress.host
-			http: paths: [{
-				path:     #config.network.ingress.path
-				pathType: #config.network.ingress.pathType
+			http: paths: [ for p in #config.network.ingress.paths {
+				path:     p.path
+				pathType: p.pathType
 				backend: service: {
 					name: #config.metadata.name
-					port: number: strconv.Atoi(#config.network.ingress.port)
+					port: number: strconv.Atoi(p.port)
 				}
 			}]
 		}]

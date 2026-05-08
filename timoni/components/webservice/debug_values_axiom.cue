@@ -17,8 +17,11 @@ package main
 		]
 		"ingress": {
 			"host":      "axiom-bot.example.com"
-			"port":      "7090"
 			"className": "nginx"
+			"paths": [
+				{"path": "/api",     "pathType": "Prefix", "port": "7090"},
+				{"path": "/metrics", "pathType": "Prefix", "port": "9099"}
+			]
 			"annotations": {
 				"cert-manager.io/cluster-issuer": "letsencrypt-prod"
 			}

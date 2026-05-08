@@ -18,12 +18,16 @@ import (
 	mountPath: string
 }
 
+#IngressPath: {
+	path:     *"/" | string
+	pathType: *"Prefix" | "Exact" | "ImplementationSpecific"
+	port:     string
+}
+
 #IngressConfig: {
-	host:        string
-	port:        string
-	className?:  string
-	path:        *"/" | string
-	pathType:    *"Prefix" | "Exact" | "ImplementationSpecific"
+	host:       string
+	className?: string
+	paths: [_, ...] & [...#IngressPath]
 	tls?: {
 		secretName: string
 		hosts?: [...string]
