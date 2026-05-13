@@ -1,0 +1,40 @@
+{{- if and .Values.network.exposed .Values.network.ingress .Values.network.ingress.host }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "webservice.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "webservice.labels" . | nindent 4 }}
+  {{- with .Values.network.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.network.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.network.ingress.tls }}
+  tls:
+    - secretName: {{ .secretName }}
+      hosts:
+        {{- if .hosts }}
+        {{- toYaml .hosts | nindent 8 }}
+        {{- else }}
+        - {{ $.Values.network.ingress.host }}
+        {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.network.ingress.host }}
+      http:
+        paths:
+          {{- range .Values.network.ingress.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "webservice.name" $ }}
+                port:
+                  number: {{ .port | int }}
+          {{- end }}
+{{- end }}

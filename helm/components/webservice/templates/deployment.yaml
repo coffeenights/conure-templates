@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "webservice.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "webservice.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.resources.replicas | int }}
+  selector:
+    matchLabels:
+      {{- include "webservice.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "webservice.selectorLabels" . | nindent 8 }}
+      {{- with .Values.pod.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      containers:
+        - name: {{ include "webservice.name" . }}
+          image: {{ include "webservice.image" . | quote }}
+          imagePullPolicy: {{ .Values.source.imagePullPolicy }}
+          {{- with .Values.source.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.source.workingDir }}
+          workingDir: {{ . | quote }}
+          {{- end }}
+          {{- if .Values.network.ports }}
+          ports:
+            {{- range .Values.network.ports }}
+            - name: {{ printf "%s-%s" (.protocol | lower) (.targetPort | toString) }}
+              containerPort: {{ .targetPort | int }}
+              protocol: {{ .protocol }}
+            {{- end }}
+          {{- end }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.cpu | quote }}
+              memory: {{ .Values.resources.memory | quote }}
+            limits:
+              cpu: {{ .Values.resources.cpu | quote }}
+              memory: {{ .Values.resources.memory | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "webservice.name" . }}-variables
+            - secretRef:
+                name: {{ include "webservice.name" . }}-secrets
+          {{- with .Values.storage }}
+          volumeMounts:
+            {{- range . }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+          {{- end }}
+      {{- with .Values.storage }}
+      volumes:
+        {{- range . }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ include "webservice.name" $ }}-{{ .name }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.source.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ . }}
+      {{- end }}

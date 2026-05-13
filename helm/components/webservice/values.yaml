@@ -1,0 +1,81 @@
+# Default values for the webservice component.
+# Mirrors the schema of the original Timoni/CUE webservice component.
+
+# Override the resource name (defaults to the Helm release name).
+nameOverride: ""
+
+# Additional labels applied to all resources.
+labels: {}
+# Additional annotations applied to all resources.
+annotations: {}
+
+# Pod-level annotations (added to pod template).
+pod:
+  annotations: {}
+
+# Service-level annotations.
+service:
+  annotations: {}
+
+resources:
+  replicas: 1
+  cpu: 100m
+  memory: 128Mi
+
+source:
+  # sourceType: "git" or "oci"
+  sourceType: oci
+
+  # OCI source
+  ociRepository: ""
+  tag: latest
+
+  # Git source (used when sourceType == "git")
+  gitRepository: ""
+  gitBranch: ""
+  # buildTool: "dockerfile" or "nixpack"
+  buildTool: dockerfile
+  dockerfilePath: Dockerfile
+  nixpackPath: ""
+
+  # Container runtime options
+  command: []
+  workingDir: ""
+  imagePullSecrets: ""
+  # imagePullPolicy: "Always" or "IfNotPresent"
+  imagePullPolicy: IfNotPresent
+
+network:
+  # When true, an Ingress is created (if `ingress` is configured).
+  exposed: false
+  # serviceType: "ClusterIP", "LoadBalancer", or "NodePort"
+  serviceType: ClusterIP
+  ports: []
+  # - hostPort: "8080"
+  #   targetPort: "8080"
+  #   protocol: TCP
+
+  ingress:
+    # Set host to a non-empty value to enable Ingress (requires network.exposed=true).
+    host: ""
+    className: ""
+    paths:
+      - path: /
+        pathType: Prefix
+        port: ""
+    tls: {}
+    # tls:
+    #   secretName: my-tls-secret
+    #   hosts:
+    #     - example.com
+    annotations: {}
+
+# List of persistent volumes to mount on the pod.
+storage: []
+# - name: data
+#   size: 1Gi
+#   mountPath: /data
+
+# Note: the Deployment's envFrom always references the ConfigMap
+# `<release>-variables` and Secret `<release>-secrets`. Those resources
+# are expected to be created out-of-band (e.g. by the Conure controller).
