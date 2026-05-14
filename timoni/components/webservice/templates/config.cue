@@ -76,23 +76,30 @@ import (
 	}
 	source: {
 		sourceType: "git" | "oci"
+		// ociRepository is the registry path the workload pulls from.
+		// For sourceType=="git" it's also the push target the CLI writes
+		// after a successful build. User-supplied; see
+		// docs/container-registries.md for the per-provider format.
+		ociRepository: string
+		tag: string
 		if sourceType == "git" {
 			gitRepository: string
 			gitBranch: string
-			buildTool: "nixpack" | *"dockerfile"
+			// buildTool selects which builder produces the image. The CLI
+			// honors this on `conure deploy --image-ref ...`. Railpack is
+			// supported only when buildLocation == "local" — the remote
+			// BuildKit Job ships the dockerfile.v0 frontend.
+			buildTool: "railpack" | *"dockerfile"
 			if buildTool == "dockerfile" {
 					dockerfilePath: string
 			}
-			if buildTool == "nixpack" {
-					nixpackPath: string
-			}
-			ociRepository: "registry-service.conure-system.svc:5000/services/" + metadata.name
-			tag: string
+			// buildLocation tells the CLI where to run the build. "local"
+			// builds on the developer's machine (or CI) and pushes the
+			// image, then asks the API to record + deploy. "remote" hands
+			// the git ref to the API, which runs a BuildKit Job inside
+			// the cluster.
+			buildLocation: "local" | *"remote"
     	}
-		if sourceType == "oci" {
-			ociRepository: string
-			tag: string
-		}
 		command: [...string]
 		workingDir: string
 		imagePullSecrets?: string

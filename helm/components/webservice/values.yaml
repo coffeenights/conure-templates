@@ -26,17 +26,21 @@ source:
   # sourceType: "git" or "oci"
   sourceType: oci
 
-  # OCI source
+  # Image coordinates (apply to both sourceType values). For git sources,
+  # the CLI writes these on every successful build.
   ociRepository: ""
   tag: latest
 
   # Git source (used when sourceType == "git")
   gitRepository: ""
   gitBranch: ""
-  # buildTool: "dockerfile" or "nixpack"
+  # buildTool: "dockerfile" or "railpack". Railpack is local-only — the
+  # remote BuildKit Job ships the dockerfile.v0 frontend.
   buildTool: dockerfile
+  # buildLocation: "local" (developer machine / CI) or "remote"
+  # (cluster-side BuildKit Job, kicked off by the API).
+  buildLocation: remote
   dockerfilePath: Dockerfile
-  nixpackPath: ""
 
   # Container runtime options
   command: []

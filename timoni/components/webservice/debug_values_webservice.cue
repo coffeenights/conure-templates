@@ -27,6 +27,7 @@ package main
     "gitRepository": "https://github.com/mredvard/fastapi_demo.git",
     "gitBranch": "main",
     "buildTool": "dockerfile",
+    "buildLocation": "remote",
     "dockerfilePath": "Dockerfile",
     "tag": "latest",
     "command": ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"],
@@ -44,9 +45,5 @@ package main
       "name": "cache",
       "mountPath": "/mnt/storage2"
     }
-  ],
-  "variables": {
-      "ENV": "dev",
-      "DEBUG": "true"
-  }
+  ]
 }
