@@ -53,7 +53,7 @@ values:
         protocol: "TCP"                  # "TCP" | "UDP" | "SCTP"
     # ingress is OPTIONAL. Rendered only when exposed: true AND ingress is set.
     ingress:
-      host: "axiom-bot.example.com"
+      host: "fastapi-demo.example.com"
       className: "traefik"               # OPTIONAL (e.g. "nginx", "traefik")
 
       # At least one path is required (paths: [_, ...]).
