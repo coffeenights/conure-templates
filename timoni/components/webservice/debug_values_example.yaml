@@ -1,0 +1,84 @@
+# =============================================================================
+# webservice — complete values example
+#
+# Every option the #Config schema accepts (templates/config.cue).
+# Fields marked OPTIONAL can be omitted; defaults are noted in comments.
+# kubeVersion / moduleVersion / metadata / selector are injected by Timoni
+# at apply-time and are NOT set here.
+# =============================================================================
+values:
+
+  # --- Pod resources (all required) -----------------------------------------
+  resources:
+    replicas: "2"          # string; >= 0
+    cpu: "500m"            # CPU quantity (e.g. "200m", "1", "2")
+    memory: "512Mi"        # memory quantity (e.g. "256Mi", "1Gi")
+
+  # --- Container image / source ---------------------------------------------
+  source:
+    # sourceType: "oci"  -> pull a prebuilt image
+    # sourceType: "git"  -> build from a git repo, then push to ociRepository
+    sourceType: "git"
+
+    # Registry path. For oci: pull target. For git: push target after build.
+    ociRepository: "ghcr.io/mredvard/fastapi_demo"
+    tag: "latest"
+
+    # ---- git-only fields (present only when sourceType == "git") ----
+    gitRepository: "https://github.com/mredvard/fastapi_demo.git"
+    gitBranch: "main"
+    # buildTool: "dockerfile" (default) | "railpack"
+    #   railpack is only valid with buildLocation: "local"
+    buildTool: "dockerfile"
+    # dockerfilePath is required only when buildTool == "dockerfile"
+    dockerfilePath: "Dockerfile"
+    # buildLocation: "remote" (default) | "local"
+    buildLocation: "remote"
+
+    # ---- common to git and oci ----
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    workingDir: "/app"
+    imagePullSecrets: "regcred"          # OPTIONAL
+    imagePullPolicy: "Always"            # "Always" | "IfNotPresent" (default)
+
+  # --- Networking -----------------------------------------------------------
+  network:
+    exposed: true                        # must be true for an Ingress to render
+    # type: "public"                     # OPTIONAL, DEPRECATED — prefer serviceType
+    serviceType: "ClusterIP"             # "ClusterIP" (default) | "LoadBalancer" | "NodePort"
+
+    ports:
+      - hostPort: "8030"
+        targetPort: "8000"
+        protocol: "TCP"                  # "TCP" | "UDP" | "SCTP"
+    # ingress is OPTIONAL. Rendered only when exposed: true AND ingress is set.
+    ingress:
+      host: "axiom-bot.example.com"
+      className: "traefik"               # OPTIONAL (e.g. "nginx", "traefik")
+
+      # At least one path is required (paths: [_, ...]).
+      paths:
+        - path: "/api"                   # default "/"
+          pathType: "Prefix"             # "Prefix" (default) | "Exact" | "ImplementationSpecific"
+          port: "8030"
+
+      # tls is OPTIONAL
+      tls:
+        secretName: "fastapi-demo-tls"
+        hosts:                           # OPTIONAL; defaults to [host] if omitted
+          - "fastapi-demo.example.com"
+
+      # annotations is OPTIONAL — arbitrary string:string map
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+
+  # --- Persistent storage ---------------------------------------------------
+  # storage is OPTIONAL. Each entry produces one PVC mounted into the pod.
+  storage:
+    - size: "1Gi"
+      name: "data"
+      mountPath: "/app/_data"
+    - size: "5Gi"
+      name: "cache"
+      mountPath: "/app/.cache"

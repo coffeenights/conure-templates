@@ -75,7 +75,7 @@ import (
 					}]
 				}
 				if #config.source.imagePullSecrets != _|_ {
-					imagePullSecrets: #config.source.imagePullSecrets
+					imagePullSecrets: [{name: #config.source.imagePullSecrets}]
 				}
 			}
 		}
