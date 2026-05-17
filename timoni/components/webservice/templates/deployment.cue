@@ -25,12 +25,7 @@ import (
 				containers: [
 					{
 						name: #config.metadata.name
-						if #config.source.sourceType == "git" {
-							image: "localhost:30050/services/" + #config.metadata.name + ":latest"
-						} 
-						if #config.source.sourceType == "oci" {
-							image: #config.source.ociRepository
-						}
+						image: #config.source.ociRepository
 						if #config.source.command != _|_ {
 							command: #config.source.command
 						}
