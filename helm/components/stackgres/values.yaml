@@ -11,7 +11,7 @@ labels: {}
 annotations: {}
 
 # PostgreSQL major version (used by SGCluster and SGPostgresConfig).
-postgresVersion: "16"
+postgresVersion: "18"
 
 # Number of Postgres instances in the cluster.
 instances: 1
