@@ -26,8 +26,10 @@ source:
   # sourceType: "git" or "oci"
   sourceType: oci
 
-  # Image coordinates (apply to both sourceType values). For git sources,
-  # the CLI writes these on every successful build.
+  # Image reference used verbatim as the container image (apply to both
+  # sourceType values). For git sources, the CLI writes the pushed image
+  # here on every successful build. Include the tag in ociRepository if
+  # needed — `tag` is retained for schema parity but is not appended.
   ociRepository: ""
   tag: latest
 

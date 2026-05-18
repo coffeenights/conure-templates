@@ -1,4 +1,3 @@
-{{- if .Values.network.ports }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -21,4 +20,3 @@ spec:
       targetPort: {{ .targetPort | int }}
       protocol: {{ .protocol }}
     {{- end }}
-{{- end }}

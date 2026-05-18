@@ -29,17 +29,11 @@ app.kubernetes.io/name: {{ include "webservice.name" . }}
 {{- end -}}
 
 {{/*
-Container image — derived from the source configuration.
+Container image. Mirrors the Timoni template, which uses
+`#config.source.ociRepository` directly for both git and oci sources
+(for git, the CLI writes the pushed image into ociRepository after build).
+The tag is not appended here — it is expected to be part of ociRepository.
 */}}
 {{- define "webservice.image" -}}
-{{- $src := .Values.source -}}
-{{- if eq $src.sourceType "git" -}}
-localhost:30050/services/{{ include "webservice.name" . }}:latest
-{{- else if eq $src.sourceType "oci" -}}
-{{- if $src.tag -}}
-{{ $src.ociRepository }}:{{ $src.tag }}
-{{- else -}}
-{{ $src.ociRepository }}
-{{- end -}}
-{{- end -}}
+{{ .Values.source.ociRepository }}
 {{- end -}}
