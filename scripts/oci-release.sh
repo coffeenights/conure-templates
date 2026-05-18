@@ -14,7 +14,8 @@
 #   scripts/oci-release.sh push    <dir>
 #
 # Env knobs (all optional):
-#   BUMP=patch|minor|major   part to increment when VERSION is unset (default patch)
+#   BUMP=patch|minor|major   bump this part before pushing (push only bumps
+#                            when BUMP or VERSION is set; `bump` defaults to patch)
 #   VERSION=x.y.z            pin an exact version instead of bumping
 #   DRY_RUN=1                print actions, change/push nothing
 #   REGISTRY=...             OCI base (default ghcr.io/coffeenights/conure-templates)
@@ -23,7 +24,7 @@ set -euo pipefail
 REGISTRY="${REGISTRY:-ghcr.io/coffeenights/conure-templates}"
 TIMONI_BASE="${TIMONI_BASE:-oci://${REGISTRY}/components}"
 HELM_BASE="${HELM_BASE:-oci://${REGISTRY}/helm/components}"
-BUMP="${BUMP:-patch}"
+BUMP="${BUMP:-}"
 VERSION="${VERSION:-}"
 DRY_RUN="${DRY_RUN:-}"
 
@@ -55,7 +56,7 @@ next_version() {
   local ma mi pa
   IFS='.' read -r ma mi pa <<< "$cur"
   ma="${ma:-0}"; mi="${mi:-0}"; pa="${pa:-0}"
-  case "$BUMP" in
+  case "${BUMP:-patch}" in
     major) ma=$((ma + 1)); mi=0; pa=0 ;;
     minor) mi=$((mi + 1)); pa=0 ;;
     patch) pa=$((pa + 1)) ;;
@@ -79,8 +80,15 @@ do_bump() {
 
 do_push() {
   local d="${1%/}" new
-  do_bump "$d"
-  new="$(cat /tmp/.oci-release-version)"
+  # Only change the version when explicitly asked (BUMP or VERSION set).
+  # Otherwise push the current VERSION as-is.
+  if [ -n "$BUMP" ] || [ -n "$VERSION" ]; then
+    do_bump "$d"
+    new="$(cat /tmp/.oci-release-version)"
+  else
+    new="$(current_version "$d")"
+    echo "using current version $d/VERSION: $new (set BUMP or VERSION to change it)"
+  fi
 
   if [ -f "$d/Chart.yaml" ]; then
     echo ">> Helm chart in $d -> $HELM_BASE (v$new)"

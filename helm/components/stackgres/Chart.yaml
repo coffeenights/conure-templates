@@ -1,0 +1,13 @@
+apiVersion: v2
+name: stackgres
+description: Conure StackGres database component — SGCluster with instance profile, Postgres config and init scripts
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - conure
+  - stackgres
+  - postgres
+  - database
+maintainers:
+  - name: coffeenights

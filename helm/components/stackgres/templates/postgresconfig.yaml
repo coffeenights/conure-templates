@@ -1,0 +1,17 @@
+apiVersion: stackgres.io/v1
+kind: SGPostgresConfig
+metadata:
+  name: {{ include "stackgres.configName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "stackgres.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  postgresVersion: {{ .Values.postgresVersion | quote }}
+  postgresql.conf:
+    {{- range $key, $value := .Values.postgresConfig }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}

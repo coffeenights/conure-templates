@@ -1,0 +1,48 @@
+# Default values for the stackgres component.
+# Creates a StackGres SGCluster plus its SGInstanceProfile, SGPostgresConfig
+# and (optionally) an SGScript for database initialization.
+
+# Override the resource name (defaults to the Helm release name).
+nameOverride: ""
+
+# Additional labels applied to all resources.
+labels: {}
+# Additional annotations applied to all resources.
+annotations: {}
+
+# PostgreSQL major version (used by SGCluster and SGPostgresConfig).
+postgresVersion: "16"
+
+# Number of Postgres instances in the cluster.
+instances: 1
+
+# Instance profile — CPU/memory reserved per pod (SGInstanceProfile).
+resources:
+  cpu: "500m"
+  memory: 1Gi
+
+# Persistent volume for the cluster pods.
+storage:
+  size: 10Gi
+  # storageClass: "" leaves it unset (cluster default StorageClass is used).
+  storageClass: ""
+
+# Optional pod scheduling. nodeSelector is omitted when empty.
+scheduling:
+  nodeSelector: {}
+  # nodeSelector:
+  #   type: storage
+
+# postgresql.conf overrides (SGPostgresConfig). Values must be strings.
+postgresConfig:
+  max_connections: "100"
+  shared_buffers: 256MB
+  password_encryption: scram-sha-256
+
+# Initialization SQL run once via managedSql (SGScript).
+# Set scripts to an empty list to skip creating the SGScript entirely.
+init:
+  scripts: []
+  # - name: create-app-database
+  #   script: |
+  #     CREATE DATABASE app;

@@ -1,0 +1,34 @@
+apiVersion: stackgres.io/v1
+kind: SGCluster
+metadata:
+  name: {{ include "stackgres.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "stackgres.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  instances: {{ .Values.instances | int }}
+  postgres:
+    version: {{ .Values.postgresVersion | quote }}
+  sgInstanceProfile: {{ include "stackgres.profileName" . }}
+  pods:
+    persistentVolume:
+      size: {{ .Values.storage.size | quote }}
+      {{- with .Values.storage.storageClass }}
+      storageClass: {{ . }}
+      {{- end }}
+    {{- with .Values.scheduling.nodeSelector }}
+    scheduling:
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+  configurations:
+    sgPostgresConfig: {{ include "stackgres.configName" . }}
+  {{- if .Values.init.scripts }}
+  managedSql:
+    scripts:
+      - sgScript: {{ include "stackgres.scriptName" . }}
+  {{- end }}

@@ -1,0 +1,20 @@
+{{- if .Values.init.scripts }}
+apiVersion: stackgres.io/v1
+kind: SGScript
+metadata:
+  name: {{ include "stackgres.scriptName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "stackgres.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scripts:
+    {{- range .Values.init.scripts }}
+    - name: {{ .name }}
+      script: |
+        {{- .script | nindent 8 }}
+    {{- end }}
+{{- end }}
