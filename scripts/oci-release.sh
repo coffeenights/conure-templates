@@ -18,6 +18,7 @@
 #                            when BUMP or VERSION is set; `bump` defaults to patch)
 #   VERSION=x.y.z            pin an exact version instead of bumping
 #   DRY_RUN=1                print actions, change/push nothing
+#   FORCE=1                  bypass safety checks (downgrade, big major jump)
 #   REGISTRY=...             OCI base (default ghcr.io/coffeenights/conure-templates)
 set -euo pipefail
 
@@ -27,6 +28,7 @@ HELM_BASE="${HELM_BASE:-oci://${REGISTRY}/helm/components}"
 BUMP="${BUMP:-}"
 VERSION="${VERSION:-}"
 DRY_RUN="${DRY_RUN:-}"
+FORCE="${FORCE:-}"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
@@ -46,11 +48,40 @@ current_version() {
   fi
 }
 
+# strict semver check (no pre-release / build metadata for this repo's tooling)
+is_semver() {
+  [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+}
+
+# guard against silent corruption from stray env vars and typos.
+# - rejects new < cur (downgrade)
+# - rejects new.major > cur.major + 1 (huge jump, usually a stray VERSION=...)
+# bypass with FORCE=1.
+sanity_check_version() {
+  local cur="$1" new="$2"
+  [ -n "$FORCE" ] && return 0
+  local cma cmi cpa nma nmi npa
+  IFS='.' read -r cma cmi cpa <<< "$cur"
+  IFS='.' read -r nma nmi npa <<< "$new"
+  # downgrade?
+  if [ "$nma" -lt "$cma" ] \
+     || { [ "$nma" -eq "$cma" ] && [ "$nmi" -lt "$cmi" ]; } \
+     || { [ "$nma" -eq "$cma" ] && [ "$nmi" -eq "$cmi" ] && [ "$npa" -lt "$cpa" ]; }; then
+    die "refusing to downgrade $cur -> $new (set FORCE=1 to override)"
+  fi
+  # big major jump?
+  if [ $((nma - cma)) -gt 1 ]; then
+    die "refusing huge major jump $cur -> $new (set FORCE=1 to override; check for a stray VERSION=... in your env)"
+  fi
+}
+
 # echoes the next version (does not write anything)
 next_version() {
   local cur="$1"
   if [ -n "$VERSION" ]; then
-    echo "${VERSION#v}"
+    local v="${VERSION#v}"
+    is_semver "$v" || die "VERSION must be x.y.z (got '$VERSION')"
+    echo "$v"
     return
   fi
   local ma mi pa
@@ -66,14 +97,21 @@ next_version() {
 }
 
 do_bump() {
-  local d="$1" cur new
+  local d="$1" cur new mode past pres
   cur="$(current_version "$d")"
+  is_semver "$cur" || die "current $d/VERSION '$cur' is not semver x.y.z"
   new="$(next_version "$cur")"
+  sanity_check_version "$cur" "$new"
+  if [ -n "$VERSION" ]; then
+    mode="pinned"; past="pinned"; pres="pin"
+  else
+    mode="${BUMP:-patch} bump"; past="bumped"; pres="bump"
+  fi
   if [ -n "$DRY_RUN" ]; then
-    echo "[dry-run] would bump $d/VERSION: $cur -> $new"
+    echo "[dry-run] would $pres $d/VERSION: $cur -> $new ($mode)"
   else
     echo "$new" > "$d/VERSION"
-    echo "bumped $d/VERSION: $cur -> $new"
+    echo "$past $d/VERSION: $cur -> $new ($mode)"
   fi
   echo "$new" > /tmp/.oci-release-version
 }
