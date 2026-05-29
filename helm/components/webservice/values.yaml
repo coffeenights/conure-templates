@@ -12,6 +12,8 @@ annotations: {}
 # Pod-level annotations (added to pod template).
 pod:
   annotations: {}
+  # Name of an existing ServiceAccount the pod runs as. Empty = default.
+  serviceAccountName: ""
 
 # Service-level annotations.
 service:

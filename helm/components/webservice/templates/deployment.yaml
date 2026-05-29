@@ -23,6 +23,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      {{- with .Values.pod.serviceAccountName }}
+      serviceAccountName: {{ . }}
+      {{- end }}
       containers:
         - name: {{ include "webservice.name" . }}
           image: {{ include "webservice.image" . | quote }}

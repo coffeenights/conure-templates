@@ -69,6 +69,14 @@ import (
 	// from the instance name and can't be overwritten.
 	selector: timoniv1.#Selector & {#Name: metadata.name}
 
+	// Pod-level settings applied to the Deployment's pod template.
+	pod?: {
+		// Annotations added to the pod template.
+		annotations?: {[string]: string}
+		// Name of an existing ServiceAccount the pod runs as.
+		serviceAccountName?: string
+	}
+
 	resources: {
 		replicas: string //int & >=0
 		cpu:      timoniv1.#CPUQuantity

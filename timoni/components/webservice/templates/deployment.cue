@@ -22,6 +22,9 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				if #config.pod.serviceAccountName != _|_ {
+					serviceAccountName: #config.pod.serviceAccountName
+				}
 				containers: [
 					{
 						name: #config.metadata.name
