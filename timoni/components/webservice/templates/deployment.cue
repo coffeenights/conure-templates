@@ -6,6 +6,24 @@ import (
 	"strconv"
 )
 
+// Renders a #Probe as a Kubernetes tcpSocket probe spec.
+#probeSpec: {
+	#probe: #Probe
+	tcpSocket: port: strconv.Atoi(#probe.port)
+	if #probe.initialDelaySeconds != _|_ {
+		initialDelaySeconds: #probe.initialDelaySeconds
+	}
+	if #probe.periodSeconds != _|_ {
+		periodSeconds: #probe.periodSeconds
+	}
+	if #probe.failureThreshold != _|_ {
+		failureThreshold: #probe.failureThreshold
+	}
+	if #probe.timeoutSeconds != _|_ {
+		timeoutSeconds: #probe.timeoutSeconds
+	}
+}
+
 #Deployment: appsv1.#Deployment & {
 	#config:    #Config
 	apiVersion: "apps/v1"
@@ -14,6 +32,19 @@ import (
 	spec: appsv1.#DeploymentSpec & {
 		replicas: strconv.Atoi(#config.resources.replicas)
 		selector: matchLabels: #config.selector.labels
+		if #config.strategy != _|_ {
+			strategy: {
+				type: "RollingUpdate"
+				rollingUpdate: {
+					if #config.strategy.maxUnavailable != _|_ {
+						maxUnavailable: #config.strategy.maxUnavailable
+					}
+					if #config.strategy.maxSurge != _|_ {
+						maxSurge: #config.strategy.maxSurge
+					}
+				}
+			}
+		}
 		template: {
 			metadata: {
 				labels: #config.selector.labels
@@ -25,6 +56,9 @@ import (
 				if #config.pod.serviceAccountName != _|_ {
 					serviceAccountName: #config.pod.serviceAccountName
 				}
+				if #config.pod.terminationGracePeriodSeconds != _|_ {
+					terminationGracePeriodSeconds: #config.pod.terminationGracePeriodSeconds
+				}
 				containers: [
 					{
 						name: #config.metadata.name
@@ -34,14 +68,27 @@ import (
 						}
 						workingDir: #config.source.workingDir
 						imagePullPolicy: #config.source.imagePullPolicy
+						if #config.pod.preStopSleepSeconds != _|_ {
+							lifecycle: preStop: exec: command: [
+								"sleep", "\(#config.pod.preStopSleepSeconds)",
+							]
+						}
+						if #config.probes.readiness != _|_ {
+							readinessProbe: #probeSpec & {#probe: #config.probes.readiness}
+						}
+						if #config.probes.startup != _|_ {
+							startupProbe: #probeSpec & {#probe: #config.probes.startup}
+						}
+						if #config.probes.liveness != _|_ {
+							livenessProbe: #probeSpec & {#probe: #config.probes.liveness}
+						}
 						resources: {
 							requests: {
-								cpu: #config.resources.cpu
-								memory: #config.resources.memory
-							},
-							limits: {
-								cpu: #config.resources.cpu
-								memory: #config.resources.memory
+								cpu: #config.resources.requests.cpu
+								memory: #config.resources.requests.memory
+							}
+							if #config.resources.limits != _|_ {
+								limits: #config.resources.limits
 							}
 						}
 						if #config.storage != _|_ {

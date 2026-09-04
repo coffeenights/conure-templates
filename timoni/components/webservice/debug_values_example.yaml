@@ -8,11 +8,17 @@
 # =============================================================================
 values:
 
-  # --- Pod resources (all required) -----------------------------------------
+  # --- Pod resources ----------------------------------------------------------
   resources:
     replicas: "2"          # string; >= 0
-    cpu: "500m"            # CPU quantity (e.g. "200m", "1", "2")
-    memory: "512Mi"        # memory quantity (e.g. "256Mi", "1Gi")
+    requests:              # required
+      cpu: "500m"          # CPU quantity (e.g. "200m", "500m")
+      memory: "512Mi"      # memory quantity (e.g. "256Mi", "1Gi")
+    # limits is OPTIONAL — omitted from the Deployment when unset.
+    # cpu and memory are each individually optional too.
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
 
   # --- Container image / source ---------------------------------------------
   source:

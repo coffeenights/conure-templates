@@ -5,8 +5,10 @@ package main
 "values": {
 	"resources": {
 		"replicas": "1",
-		"cpu":      "200m",
-		"memory":   "256Mi"
+		"requests": {
+			"cpu":    "200m",
+			"memory": "256Mi"
+		}
 	},
 	"network": {
 		"exposed":     true

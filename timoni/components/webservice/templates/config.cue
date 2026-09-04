@@ -35,6 +35,16 @@ import (
 	annotations?: {[string]: string}
 }
 
+// TCP probe against a container port. TCP keeps the module app-agnostic;
+// for the workloads deployed here a bound socket is a true ready signal.
+#Probe: {
+	port:                 string
+	initialDelaySeconds?: int & >=0
+	periodSeconds?:       int & >0
+	failureThreshold?:    int & >0
+	timeoutSeconds?:      int & >0
+}
+
 // Config defines the schema and defaults for the Instance values.
 #Config: {
 	// The kubeVersion is a required field, set at apply-time
@@ -75,12 +85,43 @@ import (
 		annotations?: {[string]: string}
 		// Name of an existing ServiceAccount the pod runs as.
 		serviceAccountName?: string
+		// How long Kubernetes waits between SIGTERM and SIGKILL. Size it
+		// to the workload's longest graceful drain (default 30).
+		terminationGracePeriodSeconds?: int & >=0
+		// preStop `sleep` before SIGTERM is sent, covering the endpoint
+		// deregistration lag so in-flight requests aren't refused.
+		preStopSleepSeconds?: int & >0
+	}
+
+	// Container probes; omitted from the Deployment when unset.
+	probes?: {
+		readiness?: #Probe
+		startup?:   #Probe
+		liveness?:  #Probe
+	}
+
+	// Rolling-update strategy knobs; Kubernetes defaults (25%/25%) when
+	// unset. Set maxUnavailable to 0 for zero-downtime rolls.
+	strategy?: {
+		maxUnavailable?: int | string
+		maxSurge?:       int | string
+	}
+
+	// PodDisruptionBudget; only meaningful with 2+ replicas (minAvailable
+	// equal to the replica count blocks node drains outright).
+	pdb?: {
+		minAvailable: int & >0
 	}
 
 	resources: {
 		replicas: string //int & >=0
-		cpu:      timoniv1.#CPUQuantity
-		memory:   timoniv1.#MemoryQuantity
+		requests: {
+			cpu:    timoniv1.#CPUQuantity
+			memory: timoniv1.#MemoryQuantity
+		}
+		// Optional maximums, set independently of requests.
+		// Omitted from the Deployment when unset.
+		limits?: timoniv1.#ResourceRequirement
 	}
 	source: {
 		sourceType: "git" | "oci"
@@ -134,6 +175,9 @@ import (
 			service: #Service & {#config: config}
 			if config.network.exposed && config.network.ingress != _|_ {
 				ingress: #Ingress & {#config: config}
+			}
+			if config.pdb != _|_ {
+				pdb: #PodDisruptionBudget & {#config: config}
 			}
 			if config.storage != _|_ {
 				for index, value in config.storage {

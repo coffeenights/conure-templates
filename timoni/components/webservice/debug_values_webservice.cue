@@ -8,8 +8,14 @@ package main
 "values": {
   "resources": {
     "replicas": "2",
-    "cpu": "200m",
-    "memory": "256Mi"
+    "requests": {
+      "cpu": "200m",
+      "memory": "256Mi"
+    },
+    "limits": {
+      "cpu": "500m",
+      "memory": "512Mi"
+    }
   },
   "network": {
     "exposed": true,
