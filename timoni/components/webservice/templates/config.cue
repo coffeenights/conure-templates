@@ -37,12 +37,14 @@ import (
 
 // TCP probe against a container port. TCP keeps the module app-agnostic;
 // for the workloads deployed here a bound socket is a true ready signal.
+// Numbers travel as strings (conure stringifies scalar values — the same
+// reason resources.replicas is a string) and are Atoi'd at render time.
 #Probe: {
 	port:                 string
-	initialDelaySeconds?: int & >=0
-	periodSeconds?:       int & >0
-	failureThreshold?:    int & >0
-	timeoutSeconds?:      int & >0
+	initialDelaySeconds?: string & =~"^\\d+$"
+	periodSeconds?:       string & =~"^[1-9]\\d*$"
+	failureThreshold?:    string & =~"^[1-9]\\d*$"
+	timeoutSeconds?:      string & =~"^[1-9]\\d*$"
 }
 
 // Config defines the schema and defaults for the Instance values.
@@ -87,10 +89,10 @@ import (
 		serviceAccountName?: string
 		// How long Kubernetes waits between SIGTERM and SIGKILL. Size it
 		// to the workload's longest graceful drain (default 30).
-		terminationGracePeriodSeconds?: int & >=0
+		terminationGracePeriodSeconds?: string & =~"^\\d+$"
 		// preStop `sleep` before SIGTERM is sent, covering the endpoint
 		// deregistration lag so in-flight requests aren't refused.
-		preStopSleepSeconds?: int & >0
+		preStopSleepSeconds?: string & =~"^[1-9]\\d*$"
 	}
 
 	// Container probes; omitted from the Deployment when unset.
@@ -101,16 +103,17 @@ import (
 	}
 
 	// Rolling-update strategy knobs; Kubernetes defaults (25%/25%) when
-	// unset. Set maxUnavailable to 0 for zero-downtime rolls.
+	// unset. Set maxUnavailable to "0" for zero-downtime rolls. Plain
+	// numbers render as ints, "N%" passes through as a percentage.
 	strategy?: {
-		maxUnavailable?: int | string
-		maxSurge?:       int | string
+		maxUnavailable?: string & =~"^\\d+%?$"
+		maxSurge?:       string & =~"^\\d+%?$"
 	}
 
 	// PodDisruptionBudget; only meaningful with 2+ replicas (minAvailable
 	// equal to the replica count blocks node drains outright).
 	pdb?: {
-		minAvailable: int & >0
+		minAvailable: string & =~"^[1-9]\\d*$"
 	}
 
 	resources: {

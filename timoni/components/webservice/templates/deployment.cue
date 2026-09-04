@@ -11,17 +11,27 @@ import (
 	#probe: #Probe
 	tcpSocket: port: strconv.Atoi(#probe.port)
 	if #probe.initialDelaySeconds != _|_ {
-		initialDelaySeconds: #probe.initialDelaySeconds
+		initialDelaySeconds: strconv.Atoi(#probe.initialDelaySeconds)
 	}
 	if #probe.periodSeconds != _|_ {
-		periodSeconds: #probe.periodSeconds
+		periodSeconds: strconv.Atoi(#probe.periodSeconds)
 	}
 	if #probe.failureThreshold != _|_ {
-		failureThreshold: #probe.failureThreshold
+		failureThreshold: strconv.Atoi(#probe.failureThreshold)
 	}
 	if #probe.timeoutSeconds != _|_ {
-		timeoutSeconds: #probe.timeoutSeconds
+		timeoutSeconds: strconv.Atoi(#probe.timeoutSeconds)
 	}
+}
+
+// IntOrString: a plain number must land as an int (the k8s API rejects
+// bare-number strings), "N%" stays a string.
+#intOrPercent: {
+	#value: string
+	out: [
+		if #value =~ "^\\d+$" {strconv.Atoi(#value)},
+		#value,
+	][0]
 }
 
 #Deployment: appsv1.#Deployment & {
@@ -37,10 +47,10 @@ import (
 				type: "RollingUpdate"
 				rollingUpdate: {
 					if #config.strategy.maxUnavailable != _|_ {
-						maxUnavailable: #config.strategy.maxUnavailable
+						maxUnavailable: (#intOrPercent & {#value: #config.strategy.maxUnavailable}).out
 					}
 					if #config.strategy.maxSurge != _|_ {
-						maxSurge: #config.strategy.maxSurge
+						maxSurge: (#intOrPercent & {#value: #config.strategy.maxSurge}).out
 					}
 				}
 			}
@@ -57,7 +67,7 @@ import (
 					serviceAccountName: #config.pod.serviceAccountName
 				}
 				if #config.pod.terminationGracePeriodSeconds != _|_ {
-					terminationGracePeriodSeconds: #config.pod.terminationGracePeriodSeconds
+					terminationGracePeriodSeconds: strconv.Atoi(#config.pod.terminationGracePeriodSeconds)
 				}
 				containers: [
 					{
