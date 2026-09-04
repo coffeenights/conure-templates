@@ -33,6 +33,14 @@ scheduling:
   # nodeSelector:
   #   type: storage
 
+# PostgreSQL extensions to install (SGCluster spec.postgres.extensions).
+# StackGres downloads each extension for the cluster's Postgres version and
+# makes it available to CREATE EXTENSION — added/removed in place, data and
+# PVCs untouched. Each entry needs at least a name; version is optional.
+extensions: []
+# extensions:
+#   - name: vector
+
 # postgresql.conf overrides (SGPostgresConfig). Values must be strings.
 postgresConfig:
   max_connections: "100"

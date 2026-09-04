@@ -47,11 +47,12 @@ spec:
           {{- end }}
           resources:
             requests:
-              cpu: {{ .Values.resources.cpu | quote }}
-              memory: {{ .Values.resources.memory | quote }}
+              cpu: {{ .Values.resources.requests.cpu | quote }}
+              memory: {{ .Values.resources.requests.memory | quote }}
+            {{- with .Values.resources.limits }}
             limits:
-              cpu: {{ .Values.resources.cpu | quote }}
-              memory: {{ .Values.resources.memory | quote }}
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ include "webservice.name" . }}-variables

@@ -21,8 +21,15 @@ service:
 
 resources:
   replicas: 1
-  cpu: 100m
-  memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  # Optional. Omitted from the Deployment when empty; set cpu/memory
+  # independently of requests (only the keys you provide are rendered).
+  limits: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
 
 source:
   # sourceType: "git" or "oci"

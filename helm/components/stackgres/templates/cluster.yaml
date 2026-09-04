@@ -13,6 +13,10 @@ spec:
   instances: {{ .Values.instances | int }}
   postgres:
     version: {{ .Values.postgresVersion | quote }}
+    {{- with .Values.extensions }}
+    extensions:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
   sgInstanceProfile: {{ include "stackgres.profileName" . }}
   pods:
     persistentVolume:
